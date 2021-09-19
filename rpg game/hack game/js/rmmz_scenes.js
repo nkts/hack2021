@@ -487,8 +487,8 @@ Scene_Title.prototype.commandWindowRect = function() {
     const offsetY = $dataSystem.titleCommandWindow.offsetY;
     const ww = this.mainCommandWidth();
     const wh = this.calcWindowHeight(3, true);
-    const wx = (Graphics.boxWidth - ww) / 2 + offsetX;
-    const wy = Graphics.boxHeight - wh - 96 + offsetY;
+    const wx = Graphics.boxWidth - ww + 75 + offsetX;
+    const wy = Graphics.boxHeight - wh + offsetY;
     return new Rectangle(wx, wy, ww, wh);
 };
 
@@ -1255,6 +1255,7 @@ Scene_Menu.prototype.create = function() {
     Scene_MenuBase.prototype.create.call(this);
     this.createCommandWindow();
     this.createGoldWindow();
+    this.createHelpWindow();
     this.createItemsWindow();
     // this.createStatusWindow();
 };
@@ -1267,7 +1268,7 @@ Scene_Menu.prototype.start = function() {
 Scene_Menu.prototype.createCommandWindow = function() {
     const rect = this.commandWindowRect();
     const commandWindow = new Window_MenuCommand(rect);
-    commandWindow.setHandler("item", this.commandItem.bind(this));
+    // commandWindow.setHandler("item", this.commandItem.bind(this));
     // commandWindow.setHandler("skill", this.commandPersonal.bind(this));
     // commandWindow.setHandler("equip", this.commandPersonal.bind(this));
     // commandWindow.setHandler("status", this.commandPersonal.bind(this));
@@ -1305,6 +1306,9 @@ Scene_Menu.prototype.goldWindowRect = function() {
 Scene_Menu.prototype.createItemsWindow = function() {
     const rect = this.itemsWindowRect();
     this._itemsWindow = new Window_ItemList(rect);
+    this._itemsWindow.setHelpWindow(this._helpWindow);
+    this._itemsWindow.setHandler("ok", this.onItemOk.bind(this));
+    this._itemsWindow.setHandler("cancel", this.onItemCancel.bind(this));
     this.addWindow(this._itemsWindow);
 }
 
@@ -1314,6 +1318,44 @@ Scene_Menu.prototype.itemsWindowRect = function() {
     const wx = this.isRightInputMode() ? 0 : Graphics.boxWidth - ww;
     const wy = this.mainAreaTop();
     return new Rectangle(wx, wy, ww, wh);
+};
+
+// Scene_Menu.prototype.item = function() {
+//     return this._itemsWindow.item();
+// };
+
+// Scene_Menu.prototype.determineItem = function() {
+//     const action = new Game_Action(this.user());
+//     const item = this.item();
+//     action.setItemObject(item);
+//     // if (action.isForFriend()) {
+//     //     this.showActorWindow();
+//     //     this._actorWindow.selectForItem(this.item());
+//     // } else {
+//     //     this.useItem();
+//     //     this.activateItemWindow();
+//     // }
+// };
+
+// Scene_Menu.prototype.onItemOk = function() {
+//     $gameParty.setLastItem(this.item());
+//     this.determineItem();
+// };
+
+// Scene_Menu.prototype.onItemCancel = function() {
+//     // this._itemWindow.deselect();
+//     this.popScene();
+//     // if (this._categoryWindow.needsSelection()) {
+//     //     this._itemWindow.deselect();
+//     //     this._categoryWindow.activate();
+//     // } else {
+//     //     this.popScene();
+//     // }
+// };
+
+Scene_Menu.prototype.activateItemWindow = function() {
+    this._itemsWindow.refresh();
+    this._itemsWindow.activate();
 };
 
 
@@ -1403,6 +1445,108 @@ Scene_Menu.prototype.onFormationCancel = function() {
         this._statusWindow.deselect();
         this._commandWindow.activate();
     }
+};
+
+//bruh
+
+Scene_Menu.prototype.item = function() {
+    return this._itemWindow.item();
+};
+
+Scene_Menu.prototype.user = function() {
+    return null;
+};
+
+Scene_Menu.prototype.isCursorLeft = function() {
+    return this._itemWindow.index() % 2 === 0;
+};
+
+Scene_Menu.prototype.determineItem = function() {
+    const action = new Game_Action(this.user());
+    const item = this.item();
+    action.setItemObject(item);
+    if (action.isForFriend()) {
+        this.showActorWindow();
+        this._actorWindow.selectForItem(this.item());
+    } else {
+        this.useItem();
+        this.activateItemWindow();
+    }
+};
+
+Scene_Menu.prototype.activateItemWindow = function() {
+    this._itemWindow.refresh();
+    this._itemWindow.activate();
+};
+
+Scene_Menu.prototype.applyItem = function() {
+    const action = new Game_Action(this.user());
+    action.setItemObject(this.item());
+    for (const target of this.itemTargetActors()) {
+        for (let i = 0; i < action.numRepeats(); i++) {
+            action.apply(target);
+        }
+    }
+    action.applyGlobal();
+};
+
+Scene_Menu.prototype.checkCommonEvent = function() {
+    if ($gameTemp.isCommonEventReserved()) {
+        SceneManager.goto(Scene_Map);
+    }
+};
+
+// Scene_Menu.prototype.create = function() {
+//     this.createHelpWindow();
+//     // this.createCategoryWindow();
+//     this.createItemWindow();
+//     // this.createActorWindow();
+// };
+
+// Scene_Menu.prototype.createItemWindow = function() {
+//     const rect = this.itemWindowRect();
+//     this._itemWindow = new Window_ItemList(rect);
+//     this._itemWindow.setHelpWindow(this._helpWindow);
+//     this._itemWindow.setHandler("ok", this.onItemOk.bind(this));
+//     this._itemWindow.setHandler("cancel", this.onItemCancel.bind(this));
+//     this.addWindow(this._itemWindow);
+//     // this._categoryWindow.setItemWindow(this._itemWindow);
+//     // if (!this._categoryWindow.needsSelection()) {
+//     //     this._itemWindow.y -= this._categoryWindow.height;
+//     //     this._itemWindow.height += this._categoryWindow.height;
+//     //     this._itemWindow.createContents();
+//     //     this._categoryWindow.update();
+//     //     this._categoryWindow.hide();
+//     //     this._categoryWindow.deactivate();
+//     //     this.onCategoryOk();
+//     // }
+// };
+
+Scene_Menu.prototype.itemWindowRect = function() {
+    const wx = 0;
+    // const wy = this._categoryWindow.y + this._categoryWindow.height;
+    const wy = 0;
+    const ww = Graphics.boxWidth;
+    const wh = this.mainAreaBottom() - wy;
+    return new Rectangle(wx, wy, ww, wh);
+};
+
+Scene_Menu.prototype.onItemOk = function() {
+    $gameParty.setLastItem(this.item());
+    this.determineItem();
+};
+
+Scene_Menu.prototype.onItemCancel = function() {
+    if (this._categoryWindow.needsSelection()) {
+        this._itemWindow.deselect();
+        this._categoryWindow.activate();
+    } else {
+        this.popScene();
+    }
+};
+
+Scene_Menu.prototype.playSeForItem = function() {
+    SoundManager.playUseItem();
 };
 
 //-----------------------------------------------------------------------------
@@ -1571,9 +1715,9 @@ Scene_Item.prototype.initialize = function() {
 Scene_Item.prototype.create = function() {
     Scene_ItemBase.prototype.create.call(this);
     this.createHelpWindow();
-    this.createCategoryWindow();
+    // this.createCategoryWindow();
     this.createItemWindow();
-    this.createActorWindow();
+    // this.createActorWindow();
 };
 
 Scene_Item.prototype.createCategoryWindow = function() {

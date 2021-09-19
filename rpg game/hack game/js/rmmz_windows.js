@@ -1649,7 +1649,15 @@ Window_Gold.prototype.refresh = function() {
     const y = rect.y;
     const width = rect.width;
     this.contents.clear();
-    this.drawCurrencyValue(this.value(), this.currencyUnit(), x, y, width);
+    this.drawRoundNumber(this.value(), this.currencyUnit(), x, y, width);
+};
+
+Window_Gold.prototype.drawRoundNumber = function(value, unit, x, y, width) {
+    const unitWidth = Math.min(80, this.textWidth(unit));
+    this.changeTextColor(ColorManager.systemColor());
+    this.drawText("Round", x, y, unitWidth * 8, "right");
+    this.resetTextColor();
+    this.drawText(value, x, y, width - unitWidth + 6, "right");
 };
 
 Window_Gold.prototype.value = function() {
@@ -2155,7 +2163,7 @@ Window_ItemList.prototype.constructor = Window_ItemList;
 
 Window_ItemList.prototype.initialize = function(rect) {
     Window_Selectable.prototype.initialize.call(this, rect);
-    this._category = "none";
+    this._category = "item";
     this._data = [];
 };
 
