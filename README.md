@@ -4,4 +4,9 @@ What we hope to convey is the necessity of long-term planning; of understanding 
 By sharing this message via a game, we present an opportunity for individuals to discover this lesson for themselves, and reflect on their contributions to a larger community. It is not the final solution, perhaps, but an important seed of inspiration.
 
 Instructions for Use
-Launch the executable by running _
+
+Our files are too big:
+
+Go to:
+https://drive.google.com/drive/folders/1ZGFsTbzHvyceMbEcoT0RHcqMpNd67d4u?usp=sharing
+to find the full project and the game itself.
